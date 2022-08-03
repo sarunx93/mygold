@@ -6,7 +6,7 @@ import Coinpage from "./pages/Coinpage";
 import useStyles from "./styles";
 function App() {
   const classes = useStyles();
-
+  //This is main2 branch.
   return (
     <BrowserRouter>
       <div className={classes.App}>
