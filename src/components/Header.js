@@ -13,6 +13,8 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { useSelector, useDispatch } from "react-redux";
 import { handleChangeCurrency } from "../features/cryptoSlice";
 import { setSymbols } from "../features/cryptoSlice";
+import UserSidebar from "./Auth/UserSidebar";
+import AuthModal from "./Auth/AuthModal";
 const Header = () => {
   const classes = useStyles();
   const darkTheme = createTheme({
@@ -21,8 +23,8 @@ const Header = () => {
     },
   });
   const dispatch = useDispatch();
-  const { currency } = useSelector((store) => store.crypto);
-  console.log(currency);
+  const { currency, user } = useSelector((store) => store.crypto);
+
   return (
     <ThemeProvider theme={darkTheme}>
       <AppBar color="transparent" position="static">
@@ -42,6 +44,7 @@ const Header = () => {
               <MenuItem value={"USD"}>USD</MenuItem>
               <MenuItem value={"THB"}>THB</MenuItem>
             </Select>
+            {user ? <UserSidebar /> : <AuthModal />}
           </Toolbar>
         </Container>
       </AppBar>

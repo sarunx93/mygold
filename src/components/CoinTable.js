@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { CoinList } from "../config/api";
-import { useSelector } from "react-redux";
-
+import { useSelector, useDispatch } from "react-redux";
+import { getAllCoins } from "../features/cryptoSlice";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import axios from "axios";
+
 import { Link, useNavigate } from "react-router-dom";
 import useStyles from "./CoinTableStyles";
 import { numberWithCommas } from "./Carousel";
@@ -22,27 +22,23 @@ import {
 } from "@mui/material";
 
 const CoinTable = () => {
-  const [coins, setCoins] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const classes = useStyles();
   const navigate = useNavigate();
   const tableHeads = ["Coin", "Price", "24h Change", "Market Cap."];
-  const { currency, symbol } = useSelector((store) => store.crypto);
+  const { currency, symbol, coins, isLoading } = useSelector(
+    (store) => store.crypto
+  );
+  const dispatch = useDispatch();
   const darkTheme = createTheme({
     palette: {
       mode: "dark",
     },
   });
-  const fetchCoins = async () => {
-    setLoading(true);
-    const { data } = await axios.get(CoinList(currency));
-    setCoins(data);
-    setLoading(false);
-  };
+
   useEffect(() => {
-    fetchCoins();
+    dispatch(getAllCoins());
   }, [currency]);
 
   const handleSearch = () => {
@@ -69,7 +65,7 @@ const CoinTable = () => {
           onChange={(e) => setSearch(e.target.value)}
         />
         <TableContainer component={Paper}>
-          {loading ? (
+          {isLoading ? (
             <h1>Loading</h1>
           ) : (
             <Table>

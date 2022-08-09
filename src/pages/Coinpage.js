@@ -1,20 +1,80 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
 import CoinInfo from "../components/CoinInfo";
 import { SingleCoin } from "../config/api";
 import useStyles from "./CoinpageStyles";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import { Typography } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import { numberWithCommas } from "../components/Carousel";
 import parse from "html-react-parser";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../config/firebase";
+import { handleAlert } from "../features/cryptoSlice";
 const Coinpage = () => {
   const { id } = useParams();
   const [coin, setCoin] = useState();
   const [isLoading, setIsLoading] = useState(false);
-  const { currency, symbol } = useSelector((store) => store.crypto);
+  const { currency, symbol, user, watchlist } = useSelector(
+    (store) => store.crypto
+  );
   const classes = useStyles();
+  const dispatch = useDispatch();
+  const inWatchlist = watchlist.includes(coin?.id);
+  console.log(watchlist);
+  const addToWatchList = async () => {
+    const coinRef = doc(db, "watchlist", user.uid);
+
+    try {
+      await setDoc(coinRef, {
+        coins: watchlist ? [...watchlist, coin.id] : [coin?.id],
+      });
+      dispatch(
+        handleAlert({
+          open: true,
+          message: `${coin.name} has been added to the list`,
+          type: "success",
+        })
+      );
+    } catch (error) {
+      dispatch(
+        handleAlert({
+          open: true,
+          message: error.message,
+          type: "error",
+        })
+      );
+    }
+  };
+  const removeFromWatchlist = async () => {
+    const coinRef = doc(db, "watchlist", user.uid);
+
+    try {
+      await setDoc(
+        coinRef,
+        {
+          coins: watchlist.filter((watch) => watch !== coin?.id),
+        },
+        { merge: "true" }
+      );
+      dispatch(
+        handleAlert({
+          open: true,
+          message: `${coin.name} has been removed to the list`,
+          type: "success",
+        })
+      );
+    } catch (error) {
+      dispatch(
+        handleAlert({
+          open: true,
+          message: error.message,
+          type: "error",
+        })
+      );
+    }
+  };
   const fetchCoin = async () => {
     setIsLoading(true);
     const { data } = await axios.get(SingleCoin(id));
@@ -76,6 +136,19 @@ const Coinpage = () => {
                 .slice(0, -6)}
             </Typography>
           </span>
+          {user && (
+            <Button
+              variant="outlined"
+              style={{
+                width: "100%",
+                height: 40,
+                backgroundColor: inWatchlist ? "red" : "gold",
+              }}
+              onClick={inWatchlist ? removeFromWatchlist : addToWatchList}
+            >
+              {inWatchlist ? "Remove from watchlist" : "Add to watchlist"}
+            </Button>
+          )}
         </div>
       </div>
 

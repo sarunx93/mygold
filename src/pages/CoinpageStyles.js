@@ -42,7 +42,8 @@ export default makeStyles(() => ({
     width: "100%",
     [theme.breakpoints.down("md")]: {
       display: "flex",
-      justifyContent: "space-around",
+      flexDirection: "column",
+      alignItems: "center",
     },
     [theme.breakpoints.down("sm")]: {
       flexDirection: "column",
